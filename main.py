@@ -2,6 +2,7 @@ import pandas as pd
 
 from metrics.missing import missing_score
 from metrics.redundancy import redundancy_score
+from metrics.bias import bias_score
 
 
 if __name__ == "__main__":
@@ -41,3 +42,23 @@ if __name__ == "__main__":
         print("No major redundancy issues detected.")
 
     print("Analysis Complete")
+
+    #Bias Analysis
+    
+    print("\n🔎 Bias Analysis")
+
+    # Change this to your actual target column name
+    bias_result = bias_score(df, target_column="department")
+
+    print("Score:", bias_result["score"])
+    print("Class Distribution:")
+
+    for cls, ratio in bias_result["class_distribution"].items():
+        print(f"  {cls} → {ratio:.2%}")
+
+    if bias_result["warnings"]:
+        for w in bias_result["warnings"]:
+            print("-", w)
+    else:
+        print("No major bias issues detected.")
+
