@@ -73,27 +73,23 @@ pip install -r requirements.txt
 ▶️ How to Use
 Step 1: Place Your Dataset
 
-Put your CSV file inside the project root folder.
+Put your CSV file inside the project root folder
+(or provide full path to the file).
 
-Example:
+Example: sample.csv
 
-sample.csv
+Step 2: Run the Tool
+✅ With Bias Analysis (Recommended)
+python main.py --file sample.csv --target department
 
-Step 2: Specify Target Column
+--file → Path to dataset (required)
+--target → Target column name for bias analysis (optional but recommended)
 
-In main.py, locate this line:
+Example: python main.py --file sample.csv --target label
 
-bias_result = bias_score(df, target_column="department")
+✅ Without Bias Analysis
 
-
-Replace "department" with your dataset’s actual target column name.
-
-Example:
-
-bias_result = bias_score(df, target_column="label")
-
-Step 3: Run
-python main.py
+If your dataset has no target column: python main.py --file sample.csv
 
 🎯 Scoring Philosophy
 
