@@ -30,3 +30,4 @@ def missing_score(df: pd.DataFrame):
         "missing_ratio": round(missing_ratio, 3),
         "warnings": warnings
     }
+

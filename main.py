@@ -4,6 +4,8 @@ import argparse
 from metrics.missing import missing_score
 from metrics.redundancy import redundancy_score
 from metrics.bias import bias_score
+from metrics.noise import noise_score
+from score_engine import final_score_engine
 
 
 def main():
@@ -64,6 +66,19 @@ def main():
     else:
         print("No major redundancy issues detected.")
 
+# Noise Analysis
+    print("\n🔎 Noise Analysis")
+
+    noise_result = noise_score(df)
+
+    print("Score:", noise_result["score"])
+
+    if noise_result["warnings"]:
+        for w in noise_result["warnings"]:
+            print("-", w)
+    else:
+        print("No major noise issues detected.")
+
     # Bias Analysis (Optional)
     if args.target:
         print("\n Bias Analysis")
@@ -85,6 +100,25 @@ def main():
 
     print("\n")
     print("Analysis Complete")
+
+    print("\n🎯 Overall ML Readiness Score")
+
+    if args.target:
+        final_result = final_score_engine(
+        missing_result["score"],
+        red_result["score"],
+        noise_result["score"],
+        bias_result["score"]
+    )
+    else:
+        final_result = final_score_engine(
+        missing_result["score"],
+        red_result["score"],
+        noise_result["score"]
+    )
+    print("Final Score:", final_result["final_score"], "/ 10")
+    print("Recommendation:", final_result["recommendation"])
+
 
 
 if __name__ == "__main__":
