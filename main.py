@@ -1,5 +1,6 @@
 import pandas as pd
 import argparse
+import json
 
 from metrics.missing import missing_score
 from metrics.redundancy import redundancy_score
@@ -41,12 +42,10 @@ def main():
     print("DATA QUALITY ANALYSIS REPORT")
 
     # Missing Analysis
-    print("\n🔎 Missing Value Analysis")
+    print("\n Missing Value Analysis")
     missing_result = missing_score(df)
-
     print("Score:", missing_result["score"])
     print("Missing Ratio:", missing_result["missing_ratio"])
-
     if missing_result["warnings"]:
         for w in missing_result["warnings"]:
             print("-", w)
@@ -54,71 +53,85 @@ def main():
         print("No major missing value issues detected.")
 
     # Redundancy Analysis
-    print("\n🔎 Redundancy Analysis")
+    print("\n Redundancy Analysis")
     red_result = redundancy_score(df)
-
     print("Score:", red_result["score"])
     print("Duplicate Ratio:", red_result["duplicate_ratio"])
-
     if red_result["warnings"]:
         for w in red_result["warnings"]:
             print("-", w)
     else:
         print("No major redundancy issues detected.")
 
-# Noise Analysis
-    print("\n🔎 Noise Analysis")
-
+    # Noise Analysis
+    print("\n Noise Analysis")
     noise_result = noise_score(df)
-
     print("Score:", noise_result["score"])
-
     if noise_result["warnings"]:
         for w in noise_result["warnings"]:
             print("-", w)
     else:
         print("No major noise issues detected.")
 
-    # Bias Analysis (Optional)
+    # Bias Analysis (optional)
+    bias_result = {}
     if args.target:
         print("\n Bias Analysis")
         bias_result = bias_score(df, args.target)
-
         print("Score:", bias_result["score"])
-
         print("Class Distribution:")
         for cls, ratio in bias_result["class_distribution"].items():
             print(f"  {cls} → {ratio:.2%}")
-
         if bias_result["warnings"]:
             for w in bias_result["warnings"]:
                 print("-", w)
         else:
             print("No major bias issues detected.")
     else:
-        print("\n No target column provided. Skipping bias analysis.")
+        print("\n⚠ No target column provided. Skipping bias analysis.")
 
-    print("\n")
-    print("Analysis Complete")
-
-    print("\n🎯 Overall ML Readiness Score")
-
+    #  Final ML Readiness Score
+    print("\n Overall ML Readiness Score")
     if args.target:
         final_result = final_score_engine(
-        missing_result["score"],
-        red_result["score"],
-        noise_result["score"],
-        bias_result["score"]
-    )
+            missing_result["score"],
+            red_result["score"],
+            noise_result["score"],
+            bias_result["score"]
+        )
     else:
         final_result = final_score_engine(
-        missing_result["score"],
-        red_result["score"],
-        noise_result["score"]
-    )
+            missing_result["score"],
+            red_result["score"],
+            noise_result["score"]
+        )
+
     print("Final Score:", final_result["final_score"], "/ 10")
     print("Recommendation:", final_result["recommendation"])
 
+    # JSON Output
+    output = {
+        "scores": {
+            "missing": missing_result["score"],
+            "redundancy": red_result["score"],
+            "noise": noise_result["score"]
+        },
+        "warnings": {
+            "missing": missing_result["warnings"],
+            "redundancy": red_result["warnings"],
+            "noise": noise_result["warnings"]
+        }
+    }
+
+    if args.target:
+        output["scores"]["bias"] = bias_result["score"]
+        output["warnings"]["bias"] = bias_result["warnings"]
+
+    output["scores"]["final"] = final_result["final_score"]
+    output["recommendation"] = final_result["recommendation"]
+
+    print("\n JSON Output:")
+    print(json.dumps(output, indent=2))
 
 
 if __name__ == "__main__":
